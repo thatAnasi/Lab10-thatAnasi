@@ -17,7 +17,25 @@ def eval_rpn(tokens):
     #   or one of the operators "+", "-", "*", "/". Evaluate it and return the integer
     #   result. Division should truncate toward zero (int(a / b)).
     #   Example: ["2","1","+","3","*"]  ->  9
-    pass
+    stack = []
+
+    for token in tokens:
+        if token not in ["+", "-", "*", "/"]:
+            stack.append(int(token))
+        else:
+            b = stack.pop()
+            a = stack.pop()
+
+            if token == "+":
+                stack.append(a + b)
+            elif token == "-":
+                stack.append(a - b)
+            elif token == "*":
+                stack.append(a * b)
+            elif token == "/":
+                stack.append(int(a / b))
+
+            return stack.pop()
 
 
 def decode_string(s):
@@ -26,7 +44,27 @@ def decode_string(s):
     # TODO: decode a string written with the rule k[encoded], meaning `encoded` repeated
     #   k times. The brackets can be nested.
     #   Example: "3[a2[c]]"  ->  "accaccacc"
-    pass
+    stack = []
+    current_string = ""
+    current_number = 0
+
+    for char in s:
+        if char.isdigit():
+            current_number = current_number * 10 + int(char)
+
+        elif char == "[":
+            stack.append((current_string, current_number))
+            current_string = ""
+            current_number = 0
+
+        elif char == "]":
+            previous_string, repeat_count = stack.pop()
+            current_string = previous_string + current_string * repeat_count
+
+        else:
+            current_string += char
+
+        return current_string
 
 
 def daily_temperatures(temps):
@@ -35,7 +73,17 @@ def daily_temperatures(temps):
     # TODO: for each day, return how many days you'd wait for a WARMER temperature.
     #   Put 0 if no warmer day ever comes.
     #   Example: [73,74,75,71,69,72,76,73]  ->  [1,1,4,2,1,1,0,0]
-    pass
+    result = [0] * len(temps)
+    stack = []
+
+    for i in range(len(temps)):
+        while stack and temps[i] > temps[stack[-1]]:
+            previous_day = stack.pop()
+            result[previous_day] = i - previous_day
+
+        stack.append(i)
+
+    return result
 
 
 def num_islands(grid):   # Part 4 - stretch (optional)
